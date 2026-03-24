@@ -2,106 +2,67 @@
 # TP4 — GitHub Actions CI/CD Pipeline
 # =============================================================================
 #
-# HOW DOES GITHUB ACTIONS WORK?
-# ------------------------------------
-# GitHub Actions automatically runs code on each event in your repo
-# (push, pull request, etc.). It's like a remote computer (Ubuntu) that:
-#   1. Clones your repo
-#   2. Installs Python + your dependencies
-#   3. Runs your tests, your linter, etc.
-#   4. Tells you if everything passed or failed
-#
-# WORKFLOW STRUCTURE:
-#   - name:        Display name in GitHub "Actions" tab
-#   - on:          When it triggers (push, pull_request...)
-#   - jobs:        Tasks to run (each job runs on a separate machine)
-#     - steps:     Steps in a job (executed sequentially)
+# WHAT THIS FILE DOES:
+# Every time you "git push" to main/master, GitHub will automatically:
+#   1. Create a temporary Ubuntu machine (called a "runner")
+#   2. Clone your repository onto it
+#   3. Install Python and your dependencies
+#   4. Run flake8 (linter) to check code quality
+#   5. Run pytest to execute your tests
+#   6. Show you the result in the "Actions" tab on GitHub
 #
 # WHERE TO SEE RESULTS?
-#   → GitHub → your repo → "Actions" tab → you'll see each run
-#   → A green ✅ = everything passed, a red ❌ = something failed
+#   GitHub → your repo → "Actions" tab
+#   ✅ green = everything passed    ❌ red = something failed
 #
 # =============================================================================
 
 name: ELT Pipeline CI
 
-# WHEN to trigger the workflow?
 on:
   push:
-    branches: [main, master]      # à chaque push sur main ou master
+    branches: [main, master]
   pull_request:
-    branches: [main, master]      # à chaque pull request vers main ou master
+    branches: [main, master]
 
 jobs:
-  test:
-    # Which machine to run on? (Ubuntu = free Linux provided by GitHub)
+  lint-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      # -----------------------------------------------------------------------
-      # Step 1: Checkout repository
-      # -----------------------------------------------------------------------
-      # "uses" = use a pre-made GitHub Action
-      # actions/checkout@v4 = clone your repo on the runner
+      # --- Step 1: Clone the repository onto the runner ---
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # -----------------------------------------------------------------------
-      # Step 2: Set up Python
-      # -----------------------------------------------------------------------
+      # --- Step 2: Install Python on the runner ---
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      # -----------------------------------------------------------------------
-      # Step 3: Install dependencies
-      # -----------------------------------------------------------------------
-      # "run" = execute shell commands (like in your terminal)
+      # --- Step 3: Install project dependencies ---
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install flake8
 
-      # -----------------------------------------------------------------------
-      # TODO: Step 4 — Linter (flake8)
-      # -----------------------------------------------------------------------
-      # Goal: automatically check code quality
-      #
-      # flake8 analyzes your Python code and detects:
-      #   - Syntax errors
-      #   - Unused variables
-      #   - Lines that are too long
-      #   - Unused imports
-      #
-      # TODO: Uncomment and complete this step:
-      #
-      # - name: Lint with flake8
-      #   run: |
-      #     pip install flake8
-      #     # Command 1: blocking errors (syntax, undefined names)
-      #     # --select=E9,F63,F7,F82 = only severe errors
-      #     # --show-source = shows the faulty line
-      #     flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
-      #     # Command 2: non-blocking warnings
-      #     # --exit-zero = does NOT fail the build for warnings
-      #     # --max-line-length=120 = max 120-character lines
-      #     flake8 src/ --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+      # --- Step 4: Lint the code with flake8 ---
+      # flake8 checks for syntax errors, unused variables, long lines, etc.
+      - name: Lint with flake8
+        run: |
+          flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 src/ --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
 
-      # -----------------------------------------------------------------------
-      # TODO: Step 5 — Run tests with coverage
-      # -----------------------------------------------------------------------
-      # Goal: run pytest and measure code coverage
+      # --- Step 5: Run tests with coverage ---
+      # TODO: Uncomment this step to run pytest in CI
       #
-      # Problem: on CI there is NO real database.
-      # Solution: set fake environment variables (env:)
-      # because our tests use mocks and never actually connect.
-      #
-      # TODO: Uncomment and complete this step:
+      # Why "env:"? The CI machine has no real database.
+      # We set fake values because our tests use mocks (@patch)
+      # and never actually connect to PostgreSQL.
       #
       # - name: Run tests with coverage
       #   env:
-      #     # Fake variables — CI won't connect to a real DB
       #     RDS_HOST: localhost
       #     RDS_PORT: "5432"
       #     RDS_DATABASE: test_db
@@ -113,11 +74,7 @@ jobs:
       #   run: |
       #     pytest tests/ -v --cov=src --cov-report=xml --cov-report=term-missing
 
-      # -----------------------------------------------------------------------
-      # TODO: Step 6 (Bonus) — Upload coverage report
-      # -----------------------------------------------------------------------
-      # This lets you download the report from the GitHub Actions run
-      #
+      # --- Step 6 (Bonus): Save the coverage report as an artifact ---
       # - name: Upload coverage report
       #   uses: actions/upload-artifact@v4
       #   with:
