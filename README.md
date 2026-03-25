@@ -2,6 +2,14 @@
 
 ELT (Extract, Load, Transform) pipeline for the **KICKZ EMPIRE** e-commerce website, built as part of the IMT Data Engineering course.
 
+## Team members
+
+| Name | Role |
+|---|---|
+| *— Amro BENRAMDANE —* | *— dev —* |
+| *— Quentin DENIS —* | *— dev —* |
+| *— Clément FORNAGE —* | *— dev —* |
+
 ## 🏗️ Architecture
 
 ```
@@ -58,6 +66,45 @@ python pipeline.py
 | Users | CSV | `raw/users/users.csv` | `users` |
 | Orders | CSV | `raw/orders/orders.csv` | `orders` |
 | Order Line Items | CSV | `raw/order_line_items/order_line_items.csv` | `order_line_items` |
+
+
+## How to run
+
+**Full pipeline** (extract → transform → gold):
+
+```bash
+python pipeline.py
+```
+
+**Individual steps** (same order as the full run):
+
+```bash
+python pipeline.py --step extract    # S3 → Bronze
+python pipeline.py --step transform # Bronze → Silver
+python pipeline.py --step gold      # Silver → Gold
+```
+
+After a run, a **pipeline report** is written to `pipeline_report.json` in the project root.
+
+## How to test (pytest)
+
+From the project root, with the virtual environment activated:
+
+```bash
+# All tests, verbose
+pytest tests/ -v
+
+# Same as CI: coverage reports
+pytest tests/ -v --cov=src --cov-report=xml --cov-report=term-missing
+```
+
+Tests use mocks and do not require a live RDS instance if you set placeholder env vars (same idea as CI):
+
+```bash
+export RDS_HOST=localhost RDS_PORT=5432 RDS_DATABASE=test_db RDS_USER=test_user RDS_PASSWORD=test_pass
+export BRONZE_SCHEMA=bronze_test SILVER_SCHEMA=silver_test GOLD_SCHEMA=gold_test
+pytest tests/ -v
+```
 
 ## 📚 Documentation
 
