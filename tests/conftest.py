@@ -95,7 +95,7 @@ def sample_order_line_items():
         "order_id": [1, 1, 2],
         "product_id": [101, 102, 103],
         "selected_size_colorway": ["M / Red", "L / Blue", "S / Black"],
-        "quantity": [1, 2, 1],
+        "quantity": [1, 2, 0],
         "unit_price_usd": [49.99, 59.99, 79.99],
         "line_total_usd": [49.99, 119.98, 79.99],
         "_warehouse_id": ["WH1", "WH1", "WH2"],

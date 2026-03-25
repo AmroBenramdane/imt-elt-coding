@@ -44,6 +44,7 @@ from src.transform import (
     transform_products,
     transform_users,
     transform_orders,
+    transform_order_line_items
 )
 
 
@@ -103,8 +104,8 @@ class TestTransformProducts:
         mock_read.return_value = sample_products  # inject fake data
         result = transform_products() # call the real function
         
-        assert (not result["tags"].str.contains("|", regex=False).any(), "Some tags still contain | "
-         and result["tags"].str.contains(", ", regex=False).all(), 'Some tags don\'t contain coma')
+        assert not any(result["tags"].str.contains("|", regex=False)), "Some tags still contain | "
+        assert all(result["tags"].str.contains(", ", regex=False)), 'Some tags don\'t contain coma'
 
     @patch("src.transform._load_to_silver")
     @patch("src.transform._read_bronze")
@@ -190,6 +191,25 @@ class TestTransformOrders:
         result = transform_orders() # call the real function
         
         assert result["coupon_code"].notna().all(), "Some values still NULL for coupon_code"
+
+class TestTransformOrderLineItems:
+    """Tests for transform_order_line_items()."""
+
+    @patch("src.transform._load_to_silver")
+    @patch("src.transform._read_bronze")
+    def test_removes_not_positive_values(self, mock_read, mock_load, sample_order_line_items):
+        mock_read.return_value = sample_order_line_items  # inject fake data
+        result = transform_order_line_items() # call the real function
+        
+        assert all(value > 0 for value in result['quantity']), "Some quantity values are not positive"
+
+    @patch("src.transform._load_to_silver")
+    @patch("src.transform._read_bronze")
+    def test_price_difference(self, mock_read, mock_load, sample_order_line_items):
+        mock_read.return_value = sample_order_line_items  # inject fake data
+        result = transform_order_line_items() # call the real function
+        
+        assert not any(abs(result["line_total_usd"] - result["unit_price_usd"] * result["quantity"]) > 0.01), "line_total_usd is not equal to unit_price_usd * quantity"
 
 
 # =============================================================================
