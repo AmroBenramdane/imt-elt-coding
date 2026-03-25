@@ -85,3 +85,22 @@ def sample_orders():
         "_stripe_charge_id": ["ch_1", "ch_2", "ch_3"],
         "_fraud_score": [0.1, 0.2, 0.9],
     })
+
+
+# =============================================================================
+# Gold layer fixtures — simulent le résultat des requêtes SQL (après JOIN)
+# =============================================================================
+
+@pytest.fixture
+def sample_product_performance():
+    """Fake result of the product_performance SQL query."""
+    return pd.DataFrame({
+        "product_id": [1, 2],
+        "product_name": ["Nike Air Max", "Adidas Ultraboost"],
+        "brand": ["Nike", "Adidas"],
+        "category": ["sneakers", "sneakers"],
+        "total_quantity_sold": [10, 5],
+        "total_revenue": [1499.90, 899.95],
+        "num_orders": [8, 4],
+        "avg_unit_price": [149.99, 179.99],
+    })

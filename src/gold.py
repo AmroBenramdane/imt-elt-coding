@@ -31,6 +31,7 @@ def _create_gold_table(df: pd.DataFrame, table_name: str, if_exists: str = "repl
     )
     # TODO (TP3): Replace with logger.info(...)
     print(f"    ✅ {GOLD_SCHEMA}.{table_name} — {len(df)} rows")
+    return df
 
 
 def _create_gold_view(view_name: str, sql: str):
