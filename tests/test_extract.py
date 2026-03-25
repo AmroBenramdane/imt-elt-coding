@@ -19,6 +19,9 @@ from src.extract import (
     extract_products,
     extract_users,
     extract_orders,
+    extract_order_line_items,
+    extract_reviews,
+    extract_clickstream
 )
 
 
@@ -95,6 +98,75 @@ class TestExtractOrders:
         # Hint: isinstance(result, pd.DataFrame)
         mock_read_csv.return_value = sample_orders
         result = extract_orders()
+        
+        assert isinstance(result, pd.DataFrame)
+
+class TestExtractOrderLineItems:
+    """Tests for extract_orders()."""
+
+    @patch("src.extract._load_to_bronze")
+    @patch("src.extract._read_csv_from_s3")
+    def test_extracts_and_loads(self, mock_read_csv, mock_load, sample_order_line_items):
+        # TODO: Same pattern as TestExtractProducts
+        mock_read_csv.return_value = sample_order_line_items
+        result = extract_order_line_items()
+        
+        assert len(result) == len(mock_read_csv.return_value)
+        mock_load.assert_called_once()
+    
+    @patch("src.extract._load_to_bronze")
+    @patch("src.extract._read_csv_from_s3")
+    def test_returns_dataframe(self, mock_read_csv, mock_load, sample_order_line_items):
+        # TODO: Test that the function returns a pandas DataFrame
+        # Hint: isinstance(result, pd.DataFrame)
+        mock_read_csv.return_value = sample_order_line_items
+        result = extract_order_line_items()
+        
+        assert isinstance(result, pd.DataFrame)
+
+class TestExtractReviews:
+    """Tests for extract_reviews()."""
+
+    @patch("src.extract._load_to_bronze")
+    @patch("src.extract._read_jsonl_from_s3")
+    def test_extracts_and_loads(self, mock_read_jsonl, mock_load, sample_reviews):
+        # TODO: Same pattern as TestExtractProducts
+        mock_read_jsonl.return_value = sample_reviews
+        result = extract_reviews()
+        
+        assert len(result) == len(mock_read_jsonl.return_value)
+        mock_load.assert_called_once()
+    
+    @patch("src.extract._load_to_bronze")
+    @patch("src.extract._read_jsonl_from_s3")
+    def test_returns_dataframe(self, mock_read_jsonl, mock_load, sample_reviews):
+        # TODO: Test that the function returns a pandas DataFrame
+        # Hint: isinstance(result, pd.DataFrame)
+        mock_read_jsonl.return_value = sample_reviews
+        result = extract_reviews()
+        
+        assert isinstance(result, pd.DataFrame)
+
+class TestExtractClickstream:
+    """Tests for extract_clickstream()."""
+
+    @patch("src.extract._load_to_bronze")
+    @patch("src.extract._read_partitioned_parquet_from_s3")
+    def test_extracts_and_loads(self, mock_read_parquet, mock_load, sample_clickstream):
+        # TODO: Same pattern as TestExtractProducts
+        mock_read_parquet.return_value = sample_clickstream
+        result = extract_clickstream()
+        
+        assert len(result) == len(mock_read_parquet.return_value)
+        mock_load.assert_called_once()
+    
+    @patch("src.extract._load_to_bronze")
+    @patch("src.extract._read_partitioned_parquet_from_s3")
+    def test_returns_dataframe(self, mock_read_parquet, mock_load, sample_clickstream):
+        # TODO: Test that the function returns a pandas DataFrame
+        # Hint: isinstance(result, pd.DataFrame)
+        mock_read_parquet.return_value = sample_clickstream
+        result = extract_clickstream()
         
         assert isinstance(result, pd.DataFrame)
     
