@@ -98,14 +98,6 @@ pytest tests/ -v
 pytest tests/ -v --cov=src --cov-report=xml --cov-report=term-missing
 ```
 
-Tests use mocks and do not require a live RDS instance if you set placeholder env vars (same idea as CI):
-
-```bash
-export RDS_HOST=localhost RDS_PORT=5432 RDS_DATABASE=test_db RDS_USER=test_user RDS_PASSWORD=test_pass
-export BRONZE_SCHEMA=bronze_test SILVER_SCHEMA=silver_test GOLD_SCHEMA=gold_test
-pytest tests/ -v
-```
-
 ## 📚 Documentation
 
 - [Data Presentation](docs/DATA_PRESENTATION.md)
