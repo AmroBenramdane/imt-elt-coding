@@ -86,7 +86,12 @@ class TestTransformProducts:
         #   2. result = transform_products()              (call the real function)
         #   3. Assert that result has only 2 rows (the one with price -10 is gone)
         #   4. Assert that all remaining prices are > 0
-        pass
+        mock_read.return_value = sample_products  # inject fake data
+        result = transform_products() # call the real function
+
+        assert len(result) == 2, "Result doesn't have 2 rows"
+        
+        assert all(value > 0 for value in result['price_usd']), "Some invalid prices are not removed"
 
     @patch("src.transform._load_to_silver")
     @patch("src.transform._read_bronze")
@@ -94,14 +99,24 @@ class TestTransformProducts:
         # TODO: Test that '|' in tags is replaced with ', '
         # After transform, "running|casual" should become "running, casual"
         # Hint: assert not result["tags"].str.contains("|", regex=False).any()
-        pass
+        
+        mock_read.return_value = sample_products  # inject fake data
+        result = transform_products() # call the real function
+        
+        assert (not result["tags"].str.contains("|", regex=False).any(), "Some tags still contain | "
+         and result["tags"].str.contains(", ", regex=False).all(), 'Some tags don\'t contain coma')
 
     @patch("src.transform._load_to_silver")
     @patch("src.transform._read_bronze")
     def test_converts_booleans(self, mock_read, mock_load, sample_products):
         # TODO: Test that is_active and is_hype_product are converted to bool
         # Hint: result["is_active"].dtype == bool
-        pass
+        
+        mock_read.return_value = sample_products  # inject fake data
+        result = transform_products() # call the real function
+        
+        assert result["is_active"].dtype == bool and result["is_hype_product"].dtype == bool, "Some columns should be boolean but are not"
+        
 
 
 class TestTransformUsers:
@@ -112,21 +127,35 @@ class TestTransformUsers:
     def test_removes_pii_columns(self, mock_read, mock_load, sample_users):
         # TODO: Test that internal columns (_hashed_password, _last_ip, _device_fingerprint)
         # are removed from the result
-        pass
+        
+        mock_read.return_value = sample_users  # inject fake data
+        result = transform_users() # call the real function
+        
+        assert not any(col in result.columns for col in ['_hashed_password', '_last_ip', '_device_fingerprint']), 'Some columns still have to be removed'
 
     @patch("src.transform._load_to_silver")
     @patch("src.transform._read_bronze")
     def test_fills_null_loyalty_tier(self, mock_read, mock_load, sample_users):
         # TODO: Test that NULL loyalty_tier values are replaced with "none"
         # Hint: result["loyalty_tier"].notna().all()
-        pass
+        
+        mock_read.return_value = sample_users  # inject fake data
+        result = transform_users() # call the real function
+        
+        assert result["loyalty_tier"].notna().all(), "Some values still NULL for loyalty_tier"
+        
 
     @patch("src.transform._load_to_silver")
     @patch("src.transform._read_bronze")
     def test_normalizes_emails(self, mock_read, mock_load, sample_users):
         # TODO: Test that emails are lowercased and stripped of whitespace
         # " Alice@Example.COM " should become "alice@example.com"
-        pass
+        
+        mock_read.return_value = sample_users  # inject fake data
+        result = transform_users() # call the real function
+        
+        assert not any(mail != mail.lower() or mail != mail.strip() for mail in result["email"]), \
+        "Some emails are not lowercased or not stripped of whitespaces"
 
 
 class TestTransformOrders:
@@ -137,21 +166,30 @@ class TestTransformOrders:
     def test_removes_invalid_statuses(self, mock_read, mock_load, sample_orders):
         # TODO: Test that rows with invalid statuses are removed
         # "invalid_status" is not in the valid set → should be filtered out
-        pass
+        mock_read.return_value = sample_orders  # inject fake data
+        result = transform_orders() # call the real function
+        
+        assert all(status != "invalid_status" for status in result['status']), "Some invalid_status are not removed"
 
     @patch("src.transform._load_to_silver")
     @patch("src.transform._read_bronze")
     def test_converts_order_date(self, mock_read, mock_load, sample_orders):
         # TODO: Test that order_date is converted to datetime type
         # Hint: "datetime" in str(result["order_date"].dtype)
-        pass
+        mock_read.return_value = sample_orders  # inject fake data
+        result = transform_orders() # call the real function
+        
+        assert "datetime" in str(result["order_date"].dtype), "order_date column is not converted to datetime type"
 
     @patch("src.transform._load_to_silver")
     @patch("src.transform._read_bronze")
     def test_replaces_null_coupon_code(self, mock_read, mock_load, sample_orders):
         # TODO: Test that NULL coupon_code values are replaced with ""
         # Hint: result["coupon_code"].notna().all()
-        pass
+        mock_read.return_value = sample_orders  # inject fake data
+        result = transform_orders() # call the real function
+        
+        assert result["coupon_code"].notna().all(), "Some values still NULL for coupon_code"
 
 
 # =============================================================================
