@@ -42,11 +42,11 @@ def get_engine():
     # Hint: use create_engine() from SQLAlchemy
     # The URL must follow this format: postgresql://{user}:{password}@{host}:{port}/{database}
     
-    user = "quentin_denis"
-    password = "Hyt7$0LbP&2!1SM5"
-    host = "imt-etl-db.ctyow40gk3bq.eu-west-3.rds.amazonaws.com"
-    port = "5432"
-    database = "imt-etl-db"
+    user = RDS_USER
+    password = RDS_PASSWORD
+    host = RDS_HOST
+    port = RDS_PORT
+    database = RDS_DATABASE
     url = f'postgresql://{user}:{password}@{host}:{port}/{database}'
     return create_engine(url)
 
